@@ -11,6 +11,16 @@ export var httpsOnly = false
 
 export var defaultCalculationStrategy = balancedApproach
 
+/**
+ * Changes the default calculation strategy.
+ * @param {function} strategy - The calculation strategy to use by default.
+ * @return {bool} Whether the change was successful.
+ */
+export const setDefaultCalculationStrategy = strategy => {
+  defaultCalculationStrategy = strategy
+  return true
+}
+
 export var timeout = {
   ping: 2000,
   rpc: 30000
