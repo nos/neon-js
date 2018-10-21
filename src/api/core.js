@@ -37,7 +37,7 @@ export const sendAsset = config => {
     .then(c => addAttributesIfExecutingAsSmartContract(c))
     .then(c => signTx(c))
     .then(c => attachContractIfExecutingAsSmartContract(c))
-    .then(c => sendTx(c))
+    .then(c => sendTx(c, 'contract'))
     .catch(err => {
       const dump = {
         net: config.net,
@@ -71,7 +71,7 @@ export const claimGas = config => {
     .then(c => addAttributesIfExecutingAsSmartContract(c))
     .then(c => signTx(c))
     .then(c => attachContractIfExecutingAsSmartContract(c))
-    .then(c => sendTx(c))
+    .then(c => sendTx(c, 'claim'))
     .catch(err => {
       const dump = {
         net: config.net,
@@ -110,7 +110,7 @@ export const doInvoke = config => {
     .then(c => signTx(c))
     .then(c => attachInvokedContractForMintToken(c))
     .then(c => attachContractIfExecutingAsSmartContract(c))
-    .then(c => sendTx(c))
+    .then(c => sendTx(c, 'invocation'))
     .catch(err => {
       const dump = {
         net: config.net,
@@ -140,7 +140,7 @@ export const setupVote = config => {
     .then(attachAttributesForEmptyTransaction)
     .then(c => signTx(c))
     .then(c => attachContractIfExecutingAsSmartContract(c))
-    .then(c => sendTx(c))
+    .then(c => sendTx(c, 'state'))
     .catch(err => {
       const dump = {
         net: config.net,
@@ -295,7 +295,7 @@ export const signTx = config => {
  * @param {string} config.url - NEO Node URL.
  * @return {Promise<object>} Configuration object + response
  */
-export const sendTx = config => {
+export const sendTx = (config, txType) => {
   checkProperty(config, 'tx', 'url')
   return Query.sendRawTransaction(config.tx)
     .execute(config.url)
@@ -303,7 +303,9 @@ export const sendTx = config => {
       // Parse result
       if (res.result === true) {
         res.txid = config.tx.hash
-        if (config.balance) {
+        if (config.balance && txType !== 'contract') {
+          // don't applyTx for contracts since that already happens via
+          // createContractTx => Transaction.calculate => Balance.applyTx
           config.balance.applyTx(config.tx, false)
         }
       } else {
