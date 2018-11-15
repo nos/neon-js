@@ -1,3 +1,4 @@
+import { csBigInteger } from 'csbiginteger'
 import { StringStream, num2hexstring, reverseHex, ensureHex, int2hex, str2ab, ab2hexstring, str2hexstring } from '../utils.js'
 import OpCode from './opCode.js'
 
@@ -72,8 +73,8 @@ class ScriptBuilder extends StringStream {
     if (num === -1) return this.emit(OpCode.PUSHM1)
     if (num === 0) return this.emit(OpCode.PUSH0)
     if (num > 0 && num <= 16) return this.emit(OpCode.PUSH1 - 1 + num)
-    const hexstring = int2hex(num)
-    return this.emitPush(reverseHex(hexstring))
+    const bn = new csBigInteger(num) // eslint-disable-line new-cap
+    return this.emitPush(bn.toHexString())
   }
 
   /**
